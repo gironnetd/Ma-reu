@@ -6,7 +6,7 @@ import java.util.List;
 
 import static com.openclassrooms.mareu.model.MeetingTime.MeetingTimeGenerator.MEETING_TIMES;
 import static com.openclassrooms.mareu.model.Place.PlaceGenerator.PLACES_LIST;
-import static com.openclassrooms.mareu.model.Participant.ParticipantGenerator.PARTICIPANTS_LIST;
+import static com.openclassrooms.mareu.model.Collaborator.CollaboratorGenerator.collaboratorsList;
 
 /**
  * Meeting class representing the Meeting object
@@ -31,7 +31,7 @@ public class Meeting {
     /**
      * list of participants of the meeting
      */
-    private List<Participant> participants;
+    private List<Collaborator> participants;
 
     /**
      * place of the meeting
@@ -46,7 +46,7 @@ public class Meeting {
         return slot;
     }
 
-    public List<Participant> getParticipants() {
+    public List<Collaborator> getParticipants() {
         return participants;
     }
 
@@ -54,14 +54,13 @@ public class Meeting {
         return place;
     }
 
-    public Meeting(long id, String subject, MeetingTime slot, List<Participant> participants, Place place) {
+    public Meeting(long id, String subject, MeetingTime slot, List<Collaborator> collaborators, Place place) {
         this.id = id;
         this.subject = subject;
         this.slot = slot;
-        this.participants = participants ;
+        this.participants = collaborators;
         this.place = place;
     }
-
 
     /**
      * Class to generate random meetings
@@ -74,13 +73,13 @@ public class Meeting {
 
         static List<Meeting> MEETINGS_LIST = Arrays.asList(
                 new Meeting(1L, "A", MEETING_TIMES.get(11),
-                        new ArrayList<Participant>(PARTICIPANTS_LIST),
+                        new ArrayList<>(collaboratorsList),
                         PLACES_LIST.get(0)),
                 new Meeting(2L, "B", MEETING_TIMES.get(1),
-                        new ArrayList<Participant>(PARTICIPANTS_LIST),
+                        new ArrayList<>(collaboratorsList),
                         PLACES_LIST.get(3)),
                 new Meeting(3L, "C", MEETING_TIMES.get(10),
-                        new ArrayList<Participant>(PARTICIPANTS_LIST),
+                        new ArrayList<>(collaboratorsList),
                         PLACES_LIST.get(4))
         );
     }

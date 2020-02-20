@@ -1,4 +1,4 @@
-package com.openclassrooms.mareu.ui.meeting_list;
+package com.openclassrooms.mareu.ui.fragments.list_meeting;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -22,7 +22,15 @@ import butterknife.ButterKnife;
 public class ListMeetingAdapter extends RecyclerView.Adapter<ListMeetingAdapter.ViewHolder> {
 
     private Context context;
+
+    /**
+     * list of the meetings
+     */
     private List<Meeting> meetings;
+
+    /**
+     * SimpleDateFormat to display start meeting time
+     */
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("H");
 
     public ListMeetingAdapter(List<Meeting> meetings) {

@@ -1,10 +1,15 @@
-package com.openclassrooms.mareu.ui.meeting_list;
+package com.openclassrooms.mareu.ui.fragments.list_meeting;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.openclassrooms.mareu.R;
 import com.openclassrooms.mareu.api.ApiService;
@@ -16,11 +21,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * Main activity of the application that display the list of meetings,
- * permit to add one and also remove.
- */
-public class ListMeetingActivity extends AppCompatActivity {
+public class ListMeetingFragment extends Fragment {
 
     /**
      * RecyclerView meetings
@@ -49,17 +50,23 @@ public class ListMeetingActivity extends AppCompatActivity {
      */
     private List<Meeting> meetings;
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list_meeting);
-        ButterKnife.bind(this);
-        mApiService = Injection.getMeetingApiService();
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_list_meeting, container, false);
+        ButterKnife.bind(this,view);
+        return view;
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        mApiService = Injection.getMeetingApiService();
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
         loadMeetings();
     }
 

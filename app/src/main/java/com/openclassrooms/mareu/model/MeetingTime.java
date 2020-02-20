@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Timer;
 
 /**
  * MeetingTime class representing the MeetingTime of Places
@@ -61,7 +60,13 @@ public class MeetingTime {
     static class MeetingTimeGenerator {
 
         static List<MeetingTime> generateMeetingTimes() {
-            return new ArrayList<>(MEETING_TIMES);
+            List<MeetingTime> meetingTimes = new ArrayList<>();
+            int hourInDay = 24;
+            for(int i = 0; i < hourInDay; ++i) {
+                meetingTimes.add(new MeetingTime(1L, new GregorianCalendar( 1900, 0, 0, i, 0).getTime(),
+                        new GregorianCalendar(1900,0,0,i + 1,0).getTime(), false));
+            }
+            return meetingTimes.subList(8, 22);
         }
 
         static List<MeetingTime> MEETING_TIMES = Arrays.asList(

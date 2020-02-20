@@ -35,4 +35,17 @@ public interface ApiService {
      * @return true if the meeting have been deleted
      */
     boolean deleteMeeting(Meeting meeting);
+
+    /**
+     *
+     * @param meetings to delete
+     * @return true if the meetings have been deleted
+     */
+    boolean deleteMeetings(List<Meeting> meetings);
+
+    /**
+     *
+     * @return true if all the meetings have been deleted
+     */
+    boolean deleteAllMeetings();
 }

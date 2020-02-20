@@ -43,9 +43,9 @@ public class Place {
     /**
      * Class to generate places where the meetings take place
      */
-    static class PlaceGenerator {
+    public static class PlaceGenerator {
 
-        static List<Place> generatePlaces() {
+        public static List<Place> generatePlaces() {
             return new ArrayList<>(PLACES_LIST);
         }
 
