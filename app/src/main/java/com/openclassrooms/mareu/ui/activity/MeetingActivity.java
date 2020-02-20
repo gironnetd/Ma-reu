@@ -16,6 +16,8 @@ import com.openclassrooms.mareu.di.Injection;
 import com.openclassrooms.mareu.ui.fragments.add_meeting.AddMeetingFragment;
 import com.openclassrooms.mareu.ui.fragments.list_meeting.ListMeetingFragment;
 
+import java.util.Collections;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -69,12 +71,6 @@ public class MeetingActivity extends AppCompatActivity {
                 showAddMeeting();
             }
         });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_list_meeting, menu);
-        return true;
     }
 
     @Override

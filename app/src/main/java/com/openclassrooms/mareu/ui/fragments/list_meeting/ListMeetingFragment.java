@@ -2,6 +2,9 @@ package com.openclassrooms.mareu.ui.fragments.list_meeting;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -20,6 +23,7 @@ import com.openclassrooms.mareu.model.Meeting;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -59,6 +63,7 @@ public class ListMeetingFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list_meeting, container, false);
         ButterKnife.bind(this,view);
+        setHasOptionsMenu(true);
         return view;
     }
 
@@ -113,5 +118,25 @@ public class ListMeetingFragment extends Fragment {
             noMeetingsTextView.setVisibility(View.VISIBLE);
             meetingsList.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_list_meeting, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.filter_by_date:
+                Collections.sort(meetings, new Meeting.MeetingDateComparator());
+                loadMeetings();
+                break;
+            case R.id.filter_by_place:
+                Collections.sort(meetings, new Meeting.MeetingPlaceComparator());
+                loadMeetings();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

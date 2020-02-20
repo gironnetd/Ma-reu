@@ -2,6 +2,7 @@ package com.openclassrooms.mareu.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.openclassrooms.mareu.model.MeetingTime.MeetingTimeGenerator.MEETING_TIMES;
@@ -80,7 +81,39 @@ public class Meeting {
                         PLACES_LIST.get(3)),
                 new Meeting(3L, "C", MEETING_TIMES.get(10),
                         new ArrayList<>(collaboratorsList),
+                        PLACES_LIST.get(4)),
+                new Meeting(1L, "A", MEETING_TIMES.get(11),
+                        new ArrayList<>(collaboratorsList),
+                PLACES_LIST.get(0)),
+                new Meeting(2L, "B", MEETING_TIMES.get(1),
+                        new ArrayList<>(collaboratorsList),
+                PLACES_LIST.get(3)),
+                new Meeting(3L, "C", MEETING_TIMES.get(10),
+                        new ArrayList<>(collaboratorsList),
+                PLACES_LIST.get(4)),
+                new Meeting(1L, "A", MEETING_TIMES.get(11),
+                        new ArrayList<>(collaboratorsList),
+                        PLACES_LIST.get(0)),
+                new Meeting(2L, "B", MEETING_TIMES.get(1),
+                        new ArrayList<>(collaboratorsList),
+                        PLACES_LIST.get(3)),
+                new Meeting(3L, "C", MEETING_TIMES.get(10),
+                        new ArrayList<>(collaboratorsList),
                         PLACES_LIST.get(4))
         );
+    }
+
+    public static class MeetingPlaceComparator implements Comparator<Meeting> {
+        @Override
+        public int compare(Meeting left, Meeting right) {
+            return left.getPlace().getName().compareTo(right.getPlace().getName());
+        }
+    }
+
+    public static class MeetingDateComparator implements Comparator<Meeting> {
+        @Override
+        public int compare(Meeting left, Meeting right) {
+            return left.getSlot().getStartTime().compareTo(right.getSlot().getStartTime());
+        }
     }
 }

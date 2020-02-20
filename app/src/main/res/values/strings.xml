@@ -28,4 +28,6 @@
     <string name="no_place_meeting_selected">Vous devez choisir un lieu de réunion</string>
     <string name="no_meeting_time_selected">Vous devez sélectionner un créneau horaire pour la réunion</string>
     <string name="no_participants_selected">Vous devez sélectionner au moins un particpant pour la réunion</string>
+    <string name="filter_by_date">filtrer par date</string>
+    <string name="filter_by_place">filtrer par lieu</string>
 </resources>
