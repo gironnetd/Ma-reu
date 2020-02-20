@@ -9,7 +9,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.openclassrooms.mareu.R;
+import com.openclassrooms.mareu.events.DeleteMeetingEvent;
 import com.openclassrooms.mareu.model.Meeting;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -48,7 +51,7 @@ public class ListMeetingAdapter extends RecyclerView.Adapter<ListMeetingAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Meeting meeting = meetings.get(position);
+        final Meeting meeting = meetings.get(position);
 
         String meetingTitle = context.getString(R.string.meeting_title_text,
                 meeting.getSubject(), Integer.valueOf(simpleDateFormat.format(meeting.getSlot().getStartTime()))
@@ -66,6 +69,13 @@ public class ListMeetingAdapter extends RecyclerView.Adapter<ListMeetingAdapter.
             }
         }
         holder.participantMails.setText(participantText.toString());
+
+        holder.deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EventBus.getDefault().post(new DeleteMeetingEvent(meeting));
+            }
+        });
     }
 
     @Override

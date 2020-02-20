@@ -14,7 +14,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.openclassrooms.mareu.R;
 import com.openclassrooms.mareu.api.ApiService;
 import com.openclassrooms.mareu.di.Injection;
+import com.openclassrooms.mareu.events.DeleteMeetingEvent;
 import com.openclassrooms.mareu.model.Meeting;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
 
@@ -67,6 +71,23 @@ public class ListMeetingFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        loadMeetings();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
+
+    /**
+     * Fired if the user clicks on a delete button
+     * @param event
+     */
+    @Subscribe
+    public void onDeleteMeeting(DeleteMeetingEvent event) {
+        mApiService.deleteMeeting(event.meeting);
         loadMeetings();
     }
 
