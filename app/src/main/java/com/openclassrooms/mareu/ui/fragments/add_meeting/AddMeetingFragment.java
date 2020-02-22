@@ -1,5 +1,6 @@
 package com.openclassrooms.mareu.ui.fragments.add_meeting;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -95,13 +96,34 @@ public class AddMeetingFragment extends Fragment {
      */
     final List<Place> places = generatePlaces();
 
+    MeetingActivity meetingActivity;
+
+    OnAddedMeetingListener mCallback;
+
+    public interface OnAddedMeetingListener {
+        void onMeetingIsAdded();
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof MeetingActivity){
+            meetingActivity =(MeetingActivity) context;
+
+            try {
+                mCallback = (OnAddedMeetingListener) meetingActivity;
+            } catch (ClassCastException e) {
+                throw new ClassCastException(meetingActivity.toString()
+                        + " must implement OnHeadlineSelectedListener");
+            }
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_meeting, container, false);
         ButterKnife.bind(this,view);
-        ((MeetingActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        ((MeetingActivity) getActivity()).getSupportActionBar().setTitle(R.string.add_meeting_title);
         setHasOptionsMenu(true);
         return view;
     }
@@ -116,11 +138,17 @@ public class AddMeetingFragment extends Fragment {
     public void onResume() {
         super.onResume();
         ((MeetingActivity) getActivity()).fabAddMeeting.setVisibility(View.GONE);
+        if(!((MeetingActivity) getActivity()).isTwoPanes()) {
+            ((MeetingActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ((MeetingActivity) getActivity()).getSupportActionBar().setTitle(R.string.add_meeting_title);
+        }
     }
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_add_meeting, menu);
+        if(!((MeetingActivity) getActivity()).isTwoPanes()) {
+            inflater.inflate(R.menu.menu_add_meeting, menu);
+        }
     }
 
     @Override
@@ -160,10 +188,26 @@ public class AddMeetingFragment extends Fragment {
                         collaboratorsAdapter.getParticipants(),selectedPlace));
                 snackbar.show();
 
-                getActivity().onBackPressed();
+                if(meetingActivity.isTwoPanes()) {
+                    mCallback.onMeetingIsAdded();
+                    clearFields();
+                } else {
+                    getActivity().onBackPressed();
+                }
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void clearFields() {
+        subjectEditText.getText().clear();
+        selectedPlace = null;
+        configureSpinnerPlaces();
+        labelMeetingTimes.setVisibility(View.GONE);
+        meetingTimesImageView.setVisibility(View.GONE);
+        meetingTimesList.setVisibility(View.GONE);
+        configureCollaboratorsList();
+
     }
 
     @Override
@@ -249,7 +293,6 @@ public class AddMeetingFragment extends Fragment {
                     }
                 }
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) { }
         });

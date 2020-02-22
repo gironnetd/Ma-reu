@@ -16,8 +16,6 @@ import com.openclassrooms.mareu.di.Injection;
 import com.openclassrooms.mareu.ui.fragments.add_meeting.AddMeetingFragment;
 import com.openclassrooms.mareu.ui.fragments.list_meeting.ListMeetingFragment;
 
-import java.util.Collections;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -25,7 +23,7 @@ import butterknife.ButterKnife;
  * Main activity of the application that display the list of meetings,
  * permit to add one and also remove.
  */
-public class MeetingActivity extends AppCompatActivity {
+public class MeetingActivity extends AppCompatActivity implements AddMeetingFragment.OnAddedMeetingListener {
 
     /**
      *
@@ -45,15 +43,29 @@ public class MeetingActivity extends AppCompatActivity {
     @BindView(R.id.fab_add_meeting)
     public FloatingActionButton fabAddMeeting;
 
+    private boolean twoPanes;
+
+    public boolean isTwoPanes() {
+        return twoPanes;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meeting);
+        isScreenHandsets();
         ButterKnife.bind(this);
-
         configureToolBar();
         configureFloatingActionButton();
         showListMeetings();
+    }
+
+    private void isScreenHandsets() {
+        if(findViewById(R.id.placeholder_fragment) != null) {
+            twoPanes = false;
+        } else {
+            twoPanes = true;
+        }
     }
 
     private void configureToolBar() {
@@ -74,6 +86,14 @@ public class MeetingActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if(twoPanes) {
+            getMenuInflater().inflate(R.menu.menu, menu);
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -87,10 +107,15 @@ public class MeetingActivity extends AppCompatActivity {
     public void onBackPressed() {
         final Fragment fragmentInFrame = getSupportFragmentManager().findFragmentById(R.id.placeholder_fragment);
 
-        if (fragmentInFrame instanceof ListMeetingFragment){
+        if(!twoPanes) {
+            if (fragmentInFrame instanceof ListMeetingFragment){
+                super.onBackPressed();
+            } else if (fragmentInFrame instanceof AddMeetingFragment) {
+                showListMeetings();
+            }
+        } else {
+
             super.onBackPressed();
-        } else if (fragmentInFrame instanceof AddMeetingFragment) {
-            showListMeetings();
         }
     }
 
@@ -98,23 +123,37 @@ public class MeetingActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         getSupportActionBar().setTitle(R.string.app_name);
 
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.placeholder_fragment, new ListMeetingFragment())
-                .commit();
+        if(!twoPanes) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.placeholder_fragment, new ListMeetingFragment())
+                    .commit();
+        }
+
         fabAddMeeting.setVisibility(View.VISIBLE);
     }
 
     private void showAddMeeting() {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.placeholder_fragment, new AddMeetingFragment())
-                .commit();
+        if(!twoPanes) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.placeholder_fragment, new AddMeetingFragment())
+                    .commit();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Injection.getMeetingApiService().deleteAllMeetings();
+    }
+
+    @Override
+    public void onMeetingIsAdded() {
+        if(twoPanes) {
+            ListMeetingFragment listMeetingFragment = (ListMeetingFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_list_meeting);
+
+            listMeetingFragment.loadMeetings();
+        }
     }
 }

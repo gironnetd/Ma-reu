@@ -19,6 +19,7 @@ import com.openclassrooms.mareu.api.ApiService;
 import com.openclassrooms.mareu.di.Injection;
 import com.openclassrooms.mareu.events.DeleteMeetingEvent;
 import com.openclassrooms.mareu.model.Meeting;
+import com.openclassrooms.mareu.ui.activity.MeetingActivity;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -99,7 +100,7 @@ public class ListMeetingFragment extends Fragment {
     /**
      * load meetings from ApiService to populate meetingsList
      */
-    private void loadMeetings() {
+    public void loadMeetings() {
         meetings = mApiService.getMeetings();
         meetingListAdapter = new ListMeetingAdapter(meetings);
         meetingsList.setAdapter(meetingListAdapter);
@@ -122,7 +123,9 @@ public class ListMeetingFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_list_meeting, menu);
+        if(!((MeetingActivity)getActivity()).isTwoPanes()) {
+            inflater.inflate(R.menu.menu_list_meeting, menu);
+        }
     }
 
     @Override
