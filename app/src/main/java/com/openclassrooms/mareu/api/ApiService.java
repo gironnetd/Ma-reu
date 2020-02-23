@@ -48,4 +48,14 @@ public interface ApiService {
      * @return true if all the meetings have been deleted
      */
     boolean deleteAllMeetings();
+
+    /**
+     * filter meetings by their place
+     */
+    void filterMeetingsByPlace();
+
+    /**
+     * filter meetings by their start time
+     */
+    void filterMeetingsByDate();
 }

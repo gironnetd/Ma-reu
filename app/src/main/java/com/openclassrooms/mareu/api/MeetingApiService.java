@@ -3,6 +3,7 @@ package com.openclassrooms.mareu.api;
 import com.openclassrooms.mareu.model.Meeting;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,7 +39,7 @@ public class MeetingApiService implements ApiService {
      */
     @Override
     public boolean createMeetings(List<Meeting> meetings) {
-        return meetings.addAll(meetings);
+        return this.meetings.addAll(meetings);
     }
 
     /**
@@ -66,5 +67,21 @@ public class MeetingApiService implements ApiService {
     public boolean deleteAllMeetings() {
         meetings.clear();
         return true;
+    }
+
+    /**
+     * filter meetings by their place
+     */
+    @Override
+    public void filterMeetingsByPlace() {
+        Collections.sort(meetings, new Meeting.MeetingPlaceComparator());
+    }
+
+    /**
+     * filter meetings by their start time
+     */
+    @Override
+    public void filterMeetingsByDate() {
+        Collections.sort(meetings, new Meeting.MeetingDateComparator());
     }
 }

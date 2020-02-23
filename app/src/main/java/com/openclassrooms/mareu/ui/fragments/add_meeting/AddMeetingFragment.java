@@ -12,12 +12,10 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -30,12 +28,10 @@ import com.openclassrooms.mareu.ui.activity.MeetingActivity;
 import com.openclassrooms.mareu.ui.fragments.add_meeting.meetingtimes.MeetingTimesAdapter;
 import com.openclassrooms.mareu.ui.fragments.add_meeting.participants.CollaboratorsAdapter;
 import com.openclassrooms.mareu.ui.fragments.add_meeting.places.PlacesSpinnerAdapter;
-
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
 import static com.openclassrooms.mareu.model.Collaborator.CollaboratorGenerator.generateCollaborators;
 import static com.openclassrooms.mareu.model.Place.PlaceGenerator.generatePlaces;
 
@@ -43,31 +39,22 @@ public class AddMeetingFragment extends Fragment {
 
     @BindView(R.id.image_view_subject_meeting)
     ImageView subjectImageView;
-
     @BindView(R.id.text_input_layout_subject_meeting)
     TextInputLayout subjectTextInputLayout;
-
     @BindView(R.id.text_input_edit_text_meeting_subject)
     TextInputEditText subjectEditText;
-
     @BindView(R.id.image_view_place_meeting)
     ImageView placesImageView;
-
     @BindView(R.id.spinner_places)
     Spinner spinnerPlaces;
-
     @BindView(R.id.label_meeting_time)
     TextView labelMeetingTimes;
-
     @BindView(R.id.image_view_meeting_times)
     ImageView meetingTimesImageView;
-
     @BindView(R.id.meeting_times_list)
     RecyclerView meetingTimesList;
-
     @BindView(R.id.image_view_meeting_participants)
     ImageView participantsImageView;
-
     @BindView(R.id.collaborators_list)
     RecyclerView collaboratorsList;
 
@@ -94,7 +81,7 @@ public class AddMeetingFragment extends Fragment {
     /**
      * list of places that can be choosed for the meeting
      */
-    final List<Place> places = generatePlaces();
+    public final List<Place> places = generatePlaces();
 
     MeetingActivity meetingActivity;
 

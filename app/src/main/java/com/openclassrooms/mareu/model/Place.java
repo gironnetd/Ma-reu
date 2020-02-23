@@ -45,8 +45,17 @@ public class Place {
      */
     public static class PlaceGenerator {
 
+        static List<String> PLACE_NAMES = Arrays.asList(
+                "Peach", "Mario", "Luigi", "Toad", "Yoshi", "Daisy"
+        );
+
         public static List<Place> generatePlaces() {
-            return new ArrayList<>(PLACES_LIST);
+            List<Place> places = new ArrayList<>();
+
+            for(int index = 0; index < PLACE_NAMES.size(); index++) {
+                places.add(new Place(index, PLACE_NAMES.get(index), generateMeetingTimes()));
+            }
+            return places;
         }
 
         static List<Place> PLACES_LIST = Arrays.asList(

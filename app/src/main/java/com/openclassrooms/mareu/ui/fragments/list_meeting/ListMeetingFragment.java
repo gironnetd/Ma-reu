@@ -59,6 +59,10 @@ public class ListMeetingFragment extends Fragment {
      */
     private List<Meeting> meetings;
 
+    public List<Meeting> getMeetings() {
+        return meetings;
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -132,11 +136,11 @@ public class ListMeetingFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.filter_by_date:
-                Collections.sort(meetings, new Meeting.MeetingDateComparator());
+                mApiService.filterMeetingsByDate();
                 loadMeetings();
                 break;
             case R.id.filter_by_place:
-                Collections.sort(meetings, new Meeting.MeetingPlaceComparator());
+                mApiService.filterMeetingsByPlace();
                 loadMeetings();
                 break;
         }
