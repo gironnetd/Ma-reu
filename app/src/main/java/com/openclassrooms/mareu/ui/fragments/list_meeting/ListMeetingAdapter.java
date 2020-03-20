@@ -31,12 +31,15 @@ public class ListMeetingAdapter extends RecyclerView.Adapter<ListMeetingAdapter.
      */
     private List<Meeting> meetings;
 
+    private boolean isUsedToFilter;
+
     /**
      * SimpleDateFormat to display start meeting time
      */
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("H");
 
-    public ListMeetingAdapter(List<Meeting> meetings) {
+    public ListMeetingAdapter(boolean isUsedToFilter, List<Meeting> meetings) {
+        this.isUsedToFilter = isUsedToFilter;
         this.meetings = meetings;
     }
 
@@ -54,7 +57,7 @@ public class ListMeetingAdapter extends RecyclerView.Adapter<ListMeetingAdapter.
         final Meeting meeting = meetings.get(position);
 
         String meetingTitle = context.getString(R.string.meeting_title_text,
-                meeting.getSubject(), Integer.valueOf(simpleDateFormat.format(meeting.getSlot().getStartTime()))
+                meeting.getSubject(), Integer.valueOf(simpleDateFormat.format(meeting.getSlot().getStartTime().getTime()))
                 , meeting.getPlace().getName());
 
         holder.meetingTitle.setText(meetingTitle);
@@ -69,6 +72,10 @@ public class ListMeetingAdapter extends RecyclerView.Adapter<ListMeetingAdapter.
             }
         }
         holder.participantMails.setText(participantText.toString());
+
+        if(isUsedToFilter) {
+            holder.deleteButton.setVisibility(View.GONE);
+        }
 
         holder.deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override

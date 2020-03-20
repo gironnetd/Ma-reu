@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Ma réu</string>
-    <string name="no_meetings_created">No Meetings have been\n created yet</string>
+    <string name="no_meetings_created">Aucune réunion\n n\'a encore été créées</string>
+    <string name="no_meetings_for_this_place">Aucune réunion\n n\'a été crée pour ce lieu</string>
     <string name="meeting_title_text">Réunion %1$s - %2$dH00 - %3$s</string>
     <string name="no_participants">Aucun collaborators</string>
     <string name="meeting_without_title">Réunion sans intitulé</string>
@@ -30,4 +31,7 @@
     <string name="no_participants_selected">Vous devez sélectionner au moins un particpant pour la réunion</string>
     <string name="filter_by_date">filtrer par date</string>
     <string name="filter_by_place">filtrer par lieu</string>
+    <string name="label_meeting_date_text">Choisissez la date de la réunion : </string>
+    <string name="no_meetings_for_this_date">Aucune réunion\n n\'a été créée pour cette date</string>
+    <string name="validate_add_meeting">Valider</string>
 </resources>

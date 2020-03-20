@@ -1,9 +1,11 @@
 package com.openclassrooms.mareu.api;
 
 import com.openclassrooms.mareu.model.Meeting;
+import com.openclassrooms.mareu.model.MeetingTime;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
@@ -71,17 +73,39 @@ public class MeetingApiService implements ApiService {
 
     /**
      * filter meetings by their place
+     *
+     * @param placeName
      */
     @Override
-    public void filterMeetingsByPlace() {
-        Collections.sort(meetings, new Meeting.MeetingPlaceComparator());
+    public List<Meeting> filterMeetingsByPlace(String placeName) {
+        List<Meeting> meetingsFilteredByPlace = new ArrayList<>();
+
+        for(int index = 0; index < meetings.size(); index++) {
+            if(meetings.get(index).getPlace().getName().equals(placeName)) {
+                meetingsFilteredByPlace.add(meetings.get(index));
+            }
+        }
+        return meetingsFilteredByPlace;
     }
 
     /**
      * filter meetings by their start time
+     *
+     * @param calendar
      */
     @Override
-    public void filterMeetingsByDate() {
-        Collections.sort(meetings, new Meeting.MeetingDateComparator());
+    public List<Meeting> filterMeetingsByDate(GregorianCalendar calendar) {
+        List<Meeting> meetingsFilteredByDate = new ArrayList<>();
+
+        for(int index = 0; index < meetings.size(); index++) {
+            GregorianCalendar startTime = meetings.get(index).getSlot().getStartTime();
+
+            if(startTime.get(Calendar.DAY_OF_MONTH) == calendar.get(Calendar.DAY_OF_MONTH) &&
+                    startTime.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) &&
+                    startTime.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)) {
+                meetingsFilteredByDate.add(meetings.get(index));
+            }
+        }
+        return meetingsFilteredByDate;
     }
 }

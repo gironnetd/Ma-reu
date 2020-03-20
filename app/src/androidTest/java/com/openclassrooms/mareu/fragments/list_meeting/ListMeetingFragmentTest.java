@@ -4,24 +4,22 @@ package com.openclassrooms.mareu.fragments.list_meeting;
 import android.view.View;
 
 import androidx.test.espresso.action.ViewActions;
+import androidx.test.espresso.contrib.PickerActions;
 import androidx.test.espresso.contrib.RecyclerViewActions;
 import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 
 import com.openclassrooms.mareu.R;
 import com.openclassrooms.mareu.api.ApiService;
-import com.openclassrooms.mareu.api.MeetingApiService;
 import com.openclassrooms.mareu.di.Injection;
 import com.openclassrooms.mareu.model.Meeting;
 import com.openclassrooms.mareu.ui.activity.MeetingActivity;
-import com.openclassrooms.mareu.ui.fragments.add_meeting.AddMeetingFragment;
 import com.openclassrooms.mareu.ui.fragments.list_meeting.ListMeetingFragment;
 import com.openclassrooms.mareu.utils.ClickViewAction;
 import com.openclassrooms.mareu.utils.DeleteViewAction;
-import com.openclassrooms.mareu.utils.RecyclerViewItemCountAssertion;
 
-import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,7 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Calendar;
 import java.util.List;
 
 import static androidx.test.espresso.Espresso.*;
@@ -38,16 +36,17 @@ import static androidx.test.espresso.action.ViewActions.*;
 import static androidx.test.espresso.assertion.ViewAssertions.*;
 import static com.openclassrooms.mareu.utils.RecyclerViewItemCountAssertion.*;
 import static org.hamcrest.core.IsNull.notNullValue;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-
-import static com.openclassrooms.mareu.model.Meeting.MeetingGenerator.*;
+import static com.openclassrooms.mareu.utils.NestedScrollViewAction.nestedScrollTo;
 
 @RunWith(AndroidJUnit4.class)
+@LargeTest
 public class ListMeetingFragmentTest {
 
     MeetingActivity mActivity;
     ApiService meetingApiService;
+
+    Calendar calendar;
 
     @Rule
     public ActivityTestRule<MeetingActivity> mActivityRule = new ActivityTestRule(MeetingActivity.class);
@@ -57,6 +56,11 @@ public class ListMeetingFragmentTest {
         mActivity = mActivityRule.getActivity();
         assertThat(mActivity, notNullValue());
         meetingApiService = Injection.getMeetingApiService();
+
+        calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+
+        calendar.set(Calendar.DAY_OF_MONTH, 15);
     }
 
     @After
@@ -92,7 +96,6 @@ public class ListMeetingFragmentTest {
 
     @Test
     public void verify_Delete_Meeting_With_Success() {
-        // Given : We remove the element at position 1
 
         // click on add floating action button if two panes screen
         clickOn_FloatingActionButton_If_Needed();
@@ -106,7 +109,7 @@ public class ListMeetingFragmentTest {
         onView(ViewMatchers.withId(R.id.list_meetings))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(1, new DeleteViewAction()));
 
-        // Then : the number of element is 11
+        // Then : the number of element is (ITEMS_COUNT - 1)
         onView(ViewMatchers.withId(R.id.list_meetings)).check(withItemCount(ITEMS_COUNT - 1));
     }
 
@@ -119,6 +122,7 @@ public class ListMeetingFragmentTest {
         addMeetings(6);
 
         List<Meeting> meetings = meetingApiService.getMeetings();
+        List<Meeting> meetingsByDate = new ArrayList<>();
 
         onView(withId(R.id.filter)).perform(click());
         onView(withText(R.string.filter_by_date)).perform(click());
@@ -127,9 +131,17 @@ public class ListMeetingFragmentTest {
                 (ListMeetingFragment) mActivity.getSupportFragmentManager()
                         .getFragments().get(0);
 
-        Collections.sort(meetings, new Meeting.MeetingDateComparator());
+            onView(withId(R.id.filter_by_date_meeting_date_picker)).perform(PickerActions.setDate(
+                    calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)));
 
-        assertEquals(meetings, listMeetingFragment.getMeetings());
+            for(int index = 0; index < meetings.size(); index++) {
+                if(meetings.get(index).getSlot().getStartTime().get(Calendar.DAY_OF_MONTH) == calendar.get(Calendar.DAY_OF_MONTH)) {
+                    meetingsByDate.add(meetings.get(index));
+                }
+        }
+
+        // Then : the number of element is (meetingsByDate.size())
+        onView(ViewMatchers.withId(R.id.list_meetings)).check(withItemCount(meetingsByDate.size()));
     }
 
     @Test
@@ -141,17 +153,22 @@ public class ListMeetingFragmentTest {
         addMeetings(6);
 
         List<Meeting> meetings = meetingApiService.getMeetings();
+        List<Meeting> meetingsByPlace = new ArrayList<>();
+
+        for(int index = 0; index < meetings.size(); index++) {
+            if(meetings.get(index).getPlace().getName().equals("Luigi")) {
+                meetingsByPlace.add(meetings.get(index));
+            }
+        }
 
         onView(withId(R.id.filter)).perform(click());
         onView(withText(R.string.filter_by_place)).perform(click());
 
-        ListMeetingFragment listMeetingFragment =
-                (ListMeetingFragment) mActivity.getSupportFragmentManager()
-                        .getFragments().get(0);
+        onView(withId(R.id.filter_by_place_spinner_places)).perform(click());
+        onView(withText("Luigi")).perform(click());
 
-        Collections.sort(meetings, new Meeting.MeetingPlaceComparator());
-
-        assertEquals(meetings, listMeetingFragment.getMeetings());
+        // Then : the number of element is (meetingsByPlace.size())
+        onView(ViewMatchers.withId(R.id.list_meetings)).check(withItemCount(meetingsByPlace.size()));
     }
 
     private void clickOn_FloatingActionButton_If_Needed() {
@@ -177,17 +194,34 @@ public class ListMeetingFragmentTest {
             onView(withId(R.id.text_input_edit_text_meeting_subject))
                     .perform(typeText("Meeting " + (index + 1)), pressImeActionButton());
 
+            onView(withId(R.id.fragment_add_meeting))
+                    .perform(swipeDown());
             onView(withId(R.id.spinner_places)).perform(click());
+
             if(index % 3 == 0) {
                 onView(withText("Mario")).perform(click());
+                onView(withId(R.id.meeting_date_picker)).perform(nestedScrollTo());
+                onView(withId(R.id.meeting_date_picker)).perform(PickerActions.setDate(
+                        calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH) + 1));
+
+                onView(withId(R.id.image_view_date_meeting)).perform(click());
                 onView(withId(R.id.meeting_times_list))
                         .perform(RecyclerViewActions.actionOnItemAtPosition(index + 2, new ClickViewAction()));
             } else if(index % 2 == 0) {
                 onView(withText("Luigi")).perform(click());
+                onView(withId(R.id.meeting_date_picker)).perform(nestedScrollTo());
+                onView(withId(R.id.meeting_date_picker)).perform(PickerActions.setDate(
+                        calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH) + 2));
+
+                onView(withId(R.id.image_view_date_meeting)).perform(click());
                 onView(withId(R.id.meeting_times_list))
                         .perform(RecyclerViewActions.actionOnItemAtPosition(index + 1, new ClickViewAction()));
             } else {
                 onView(withText("Peach")).perform(click());
+                onView(withId(R.id.meeting_date_picker)).perform(nestedScrollTo());
+                onView(withId(R.id.meeting_date_picker)).perform(PickerActions.setDate(
+                        calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)));
+                onView(withId(R.id.image_view_date_meeting)).perform(click());
                 onView(withId(R.id.meeting_times_list))
                         .perform(RecyclerViewActions.actionOnItemAtPosition(index, new ClickViewAction()));
             }
@@ -199,6 +233,10 @@ public class ListMeetingFragmentTest {
 
             onView(ViewMatchers.withId(R.id.collaborators_list))
                     .perform(RecyclerViewActions.actionOnItemAtPosition(3, new ClickViewAction()));
+
+
+            onView(withId(R.id.fragment_add_meeting))
+                    .perform(swipeDown());
 
             // click on add meeting button
             onView(withId(R.id.add_meeting)).perform(click());

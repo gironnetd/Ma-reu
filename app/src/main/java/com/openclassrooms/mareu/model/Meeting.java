@@ -2,6 +2,7 @@ package com.openclassrooms.mareu.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -94,6 +95,10 @@ public class Meeting {
             int meetingsCount = 9;
             for(int index = 0; index < meetingsCount; index++) {
                 Meeting meetingToAdd;
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(System.currentTimeMillis());
+
                 if(index % 3 == 0) {
                     meetingToAdd = new Meeting(index + 1, "Meeting " + (index + 1), generateMeetingTimes().get(10),
                             new ArrayList<>(generateCollaborators()),
@@ -108,6 +113,7 @@ public class Meeting {
                             generatePlaces().get(0));
                 }
                 meetings.add(meetingToAdd);
+
             }
             return meetings;
         }
@@ -141,19 +147,5 @@ public class Meeting {
                         new ArrayList<>(generateCollaborators()),
                         generatePlaces().get(4))
         );
-    }
-
-    public static class MeetingPlaceComparator implements Comparator<Meeting> {
-        @Override
-        public int compare(Meeting left, Meeting right) {
-            return left.getPlace().getName().compareTo(right.getPlace().getName());
-        }
-    }
-
-    public static class MeetingDateComparator implements Comparator<Meeting> {
-        @Override
-        public int compare(Meeting left, Meeting right) {
-            return left.getSlot().getStartTime().compareTo(right.getSlot().getStartTime());
-        }
     }
 }

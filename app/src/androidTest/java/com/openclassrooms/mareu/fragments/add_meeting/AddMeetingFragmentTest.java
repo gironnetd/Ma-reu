@@ -1,13 +1,12 @@
 package com.openclassrooms.mareu.fragments.add_meeting;
 
-
 import android.view.View;
-
 import androidx.test.espresso.action.ViewActions;
-import androidx.test.espresso.assertion.ViewAssertions;
+import androidx.test.espresso.contrib.PickerActions;
 import androidx.test.espresso.contrib.RecyclerViewActions;
 import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 
 import com.openclassrooms.mareu.R;
@@ -19,21 +18,24 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Calendar;
+
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.pressImeActionButton;
 import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static com.openclassrooms.mareu.utils.NestedScrollViewAction.nestedScrollTo;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
-import static androidx.test.espresso.Espresso.*;
 import static androidx.test.espresso.matcher.ViewMatchers.*;
 import static androidx.test.espresso.action.ViewActions.*;
 import static androidx.test.espresso.assertion.ViewAssertions.*;
 
 @RunWith(AndroidJUnit4.class)
+@LargeTest
 public class AddMeetingFragmentTest {
 
     MeetingActivity mActivity;
@@ -73,10 +75,22 @@ public class AddMeetingFragmentTest {
 
         onView(withText(R.string.no_meeting_time_selected)).check(matches(isDisplayed()));
 
+        onView(withId(R.id.meeting_date_picker)).perform(nestedScrollTo());
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+
+        onView(withId(R.id.meeting_date_picker)).perform(PickerActions.setDate(
+                calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)));
+
+        onView(withId(R.id.image_view_date_meeting)).perform(click());
         onView(withId(R.id.meeting_times_list))
                     .perform(RecyclerViewActions.actionOnItemAtPosition(2, new ClickViewAction()));
 
         onView(withId(R.id.image_view_meeting_times)).perform(click());
+
+        onView(withId(R.id.fragment_add_meeting))
+                .perform(swipeDown());
 
         // click on add meeting button
         clickOnAddMeetingMenuItem();
@@ -89,6 +103,10 @@ public class AddMeetingFragmentTest {
         onView(ViewMatchers.withId(R.id.collaborators_list))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(3, new ClickViewAction()));
 
+        onView(withId(R.id.fragment_add_meeting))
+                .perform(swipeDown());
+
+        // click on add meeting button
         clickOnAddMeetingMenuItem();
 
         onView(withText(R.string.meeting_added)).check(matches(isDisplayed()));

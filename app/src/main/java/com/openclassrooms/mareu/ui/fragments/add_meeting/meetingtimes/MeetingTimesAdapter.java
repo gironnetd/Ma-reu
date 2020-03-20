@@ -18,6 +18,8 @@ import com.openclassrooms.mareu.model.Place;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -35,6 +37,8 @@ public class MeetingTimesAdapter extends RecyclerView.Adapter<MeetingTimesAdapte
      * place of the meeting
      */
     private Place selectedPlace;
+
+    private GregorianCalendar selectedDate;
 
     /**
      * meeting time selected for the meeting
@@ -65,9 +69,28 @@ public class MeetingTimesAdapter extends RecyclerView.Adapter<MeetingTimesAdapte
         return selectedMeetingTime;
     }
 
-    public MeetingTimesAdapter(Place selectedPlace) {
+    public void setDateOfSelectedMeetingTime(GregorianCalendar calendar) {
+        selectedMeetingTime.getStartTime().set(Calendar.YEAR, calendar.get(Calendar.YEAR));
+
+        selectedMeetingTime.getStartTime().set(Calendar.MONTH,
+                (calendar.get(Calendar.MONTH) + 1));
+        selectedMeetingTime.getStartTime().set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH));
+    }
+
+    public MeetingTimesAdapter(GregorianCalendar selectedDate, Place selectedPlace) {
         this.selectedPlace = selectedPlace;
+        this.selectedDate = selectedDate;
+
+
+        for(int index = 0; index < selectedPlace.getMeetingTimes().size(); index++) {
+            selectedPlace.getMeetingTimes().get(index).getStartTime()
+                    .set(selectedDate.get(Calendar.YEAR),
+                            selectedDate.get(Calendar.MONTH), selectedDate.get(Calendar.DAY_OF_MONTH)
+                            );
+        }
         this.viewHolders = new ArrayList<>();
+        this.viewHolders.clear();
+        notifyDataSetChanged();
         lastSelectedPosition = -1;
     }
 
@@ -87,8 +110,8 @@ public class MeetingTimesAdapter extends RecyclerView.Adapter<MeetingTimesAdapte
         final MeetingTime meetingTime = selectedPlace.getMeetingTimes().get(position);
 
         String meetingTimeText = context.getString(R.string.meeting_time_string_format,
-                DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE).format(meetingTime.getStartTime()),
-                DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE).format(meetingTime.getEndTime()));
+                DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE).format(meetingTime.getStartTime().getTime()),
+                DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE).format(meetingTime.getEndTime().getTime()));
 
         Spanned styledText = HtmlCompat.fromHtml(meetingTimeText, HtmlCompat.FROM_HTML_MODE_LEGACY);
         holder.meetingTime.setText(styledText);

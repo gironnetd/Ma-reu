@@ -15,7 +15,7 @@
             <com.google.android.material.appbar.CollapsingToolbarLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:layout_scrollFlags="scroll|enterAlways|snap"
+                app:layout_scrollFlags="snapMargins"
                 app:titleEnabled="false">
 
                 <androidx.appcompat.widget.Toolbar
@@ -25,10 +25,8 @@
                     android:background="?attr/colorPrimary"
                     android:elevation="4dp"
                     app:popupTheme="@style/AppTheme.PopupOverlay"
-                    app:layout_collapseMode="pin" />
-
+                    app:layout_collapseMode="none" />
             </com.google.android.material.appbar.CollapsingToolbarLayout>
-
         </com.google.android.material.appbar.AppBarLayout>
 
         <FrameLayout

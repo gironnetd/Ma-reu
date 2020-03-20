@@ -45,7 +45,7 @@ public class Place {
      */
     public static class PlaceGenerator {
 
-        static List<String> PLACE_NAMES = Arrays.asList(
+        public static List<String> PLACE_NAMES = Arrays.asList(
                 "Peach", "Mario", "Luigi", "Toad", "Yoshi", "Daisy"
         );
 

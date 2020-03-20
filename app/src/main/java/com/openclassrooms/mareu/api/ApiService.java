@@ -2,6 +2,7 @@ package com.openclassrooms.mareu.api;
 
 import com.openclassrooms.mareu.model.Meeting;
 
+import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
@@ -52,10 +53,10 @@ public interface ApiService {
     /**
      * filter meetings by their place
      */
-    void filterMeetingsByPlace();
+    List<Meeting> filterMeetingsByPlace(String placeName);
 
     /**
      * filter meetings by their start time
      */
-    void filterMeetingsByDate();
+    List<Meeting> filterMeetingsByDate(GregorianCalendar calendar);
 }

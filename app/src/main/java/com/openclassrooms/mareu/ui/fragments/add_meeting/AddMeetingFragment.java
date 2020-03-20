@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -28,10 +29,16 @@ import com.openclassrooms.mareu.ui.activity.MeetingActivity;
 import com.openclassrooms.mareu.ui.fragments.add_meeting.meetingtimes.MeetingTimesAdapter;
 import com.openclassrooms.mareu.ui.fragments.add_meeting.participants.CollaboratorsAdapter;
 import com.openclassrooms.mareu.ui.fragments.add_meeting.places.PlacesSpinnerAdapter;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
+import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
 import static com.openclassrooms.mareu.model.Collaborator.CollaboratorGenerator.generateCollaborators;
 import static com.openclassrooms.mareu.model.Place.PlaceGenerator.generatePlaces;
 
@@ -47,6 +54,12 @@ public class AddMeetingFragment extends Fragment {
     ImageView placesImageView;
     @BindView(R.id.spinner_places)
     Spinner spinnerPlaces;
+    @BindView(R.id.label_meeting_date)
+    TextView labelDateMeeting;
+    @BindView(R.id.image_view_date_meeting)
+    ImageView dateMeetingImageView;
+    @BindView(R.id.meeting_date_picker)
+    DatePicker meetingDatePicker;
     @BindView(R.id.label_meeting_time)
     TextView labelMeetingTimes;
     @BindView(R.id.image_view_meeting_times)
@@ -81,11 +94,15 @@ public class AddMeetingFragment extends Fragment {
     /**
      * list of places that can be choosed for the meeting
      */
-    public final List<Place> places = generatePlaces();
+    private Map<GregorianCalendar, List<Place>> placesByDate;
 
-    MeetingActivity meetingActivity;
+    private GregorianCalendar selectedDate;
 
-    OnAddedMeetingListener mCallback;
+    private int spinnerPlacesPosition;
+
+    private MeetingActivity meetingActivity;
+
+    private OnAddedMeetingListener mCallback;
 
     public interface OnAddedMeetingListener {
         void onMeetingIsAdded();
@@ -96,9 +113,8 @@ public class AddMeetingFragment extends Fragment {
         super.onAttach(context);
         if (context instanceof MeetingActivity){
             meetingActivity =(MeetingActivity) context;
-
             try {
-                mCallback = (OnAddedMeetingListener) meetingActivity;
+                mCallback =(OnAddedMeetingListener) meetingActivity;
             } catch (ClassCastException e) {
                 throw new ClassCastException(meetingActivity.toString()
                         + " must implement OnHeadlineSelectedListener");
@@ -124,83 +140,87 @@ public class AddMeetingFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        ((MeetingActivity) getActivity()).fabAddMeeting.setVisibility(View.GONE);
-        if(!((MeetingActivity) getActivity()).isTwoPanes()) {
-            ((MeetingActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            ((MeetingActivity) getActivity()).getSupportActionBar().setTitle(R.string.add_meeting_title);
+        ((MeetingActivity) Objects.requireNonNull(getActivity())).fabAddMeeting.setVisibility(View.GONE);
+        if (!((MeetingActivity) getActivity()).isTwoPanes()) {
+            Objects.requireNonNull(((MeetingActivity) getActivity()).getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+            Objects.requireNonNull(((MeetingActivity) getActivity()).getSupportActionBar()).setTitle(R.string.add_meeting_title);
         }
     }
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        if(!((MeetingActivity) getActivity()).isTwoPanes()) {
+        if (!((MeetingActivity) Objects.requireNonNull(getActivity())).isTwoPanes()) {
             inflater.inflate(R.menu.menu_add_meeting, menu);
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.add_meeting :
-                Snackbar snackbar = Snackbar.make(((MeetingActivity) getActivity()).coordinatorLayout,getString(R.string.meeting_added),Snackbar.LENGTH_SHORT);
+        if (item.getItemId() == R.id.add_meeting) {
+            Snackbar snackbar = Snackbar.make(((MeetingActivity) Objects.requireNonNull(getActivity())).coordinatorLayout, getString(R.string.meeting_added), Snackbar.LENGTH_SHORT);
 
-                if(subjectEditText.getText().length() == 0) {
-                    snackbar.setText(getString(R.string.no_subject_meeting_registered));
-                    snackbar.show();
-                    break;
-                }
-
-                if(selectedPlace == null) {
-                    snackbar.setText(getString(R.string.no_place_meeting_selected));
-                    snackbar.show();
-                    break;
-                }
-
-                if(meetingTimesAdapter.getSelectedMeetingTime() == null) {
-                    snackbar.setText(getString(R.string.no_meeting_time_selected));
-                    snackbar.show();
-                    break;
-                }
-
-                if(collaboratorsAdapter.getParticipants().isEmpty()) {
-                    snackbar.setText(getString(R.string.no_participants_selected));
-                    snackbar.show();
-                    break;
-                }
-
-                selectedPlace.getMeetingTimes().get(meetingTimesAdapter.getLastSelectedPosition()).setReserved(true);
-                mApiService.createMeeting(new Meeting(mApiService.getMeetings().size(),
-                        subjectEditText.getText().toString(),
-                        meetingTimesAdapter.getSelectedMeetingTime(),
-                        collaboratorsAdapter.getParticipants(),selectedPlace));
+            if (Objects.requireNonNull(subjectEditText.getText()).length() == 0) {
+                snackbar.setText(getString(R.string.no_subject_meeting_registered));
                 snackbar.show();
+                return super.onOptionsItemSelected(item);
+            }
 
-                if(meetingActivity.isTwoPanes()) {
-                    mCallback.onMeetingIsAdded();
-                    clearFields();
-                } else {
-                    getActivity().onBackPressed();
-                }
-                break;
+            if (selectedPlace == null) {
+                snackbar.setText(getString(R.string.no_place_meeting_selected));
+                snackbar.show();
+                return super.onOptionsItemSelected(item);
+            }
+
+            if (meetingTimesAdapter == null || meetingTimesAdapter.getSelectedMeetingTime() == null) {
+                snackbar.setText(getString(R.string.no_meeting_time_selected));
+                snackbar.show();
+                return super.onOptionsItemSelected(item);
+            }
+
+            if (collaboratorsAdapter.getParticipants().isEmpty()) {
+                snackbar.setText(getString(R.string.no_participants_selected));
+                snackbar.show();
+                return super.onOptionsItemSelected(item);
+            }
+
+            Objects.requireNonNull(placesByDate.get(selectedDate)).get(spinnerPlacesPosition).getMeetingTimes()
+                    .get(meetingTimesAdapter.getLastSelectedPosition()).setReserved(true);
+
+            mApiService.createMeeting(new Meeting(mApiService.getMeetings().size(),
+                    subjectEditText.getText().toString(),
+                    meetingTimesAdapter.getSelectedMeetingTime(),
+                    collaboratorsAdapter.getParticipants(), Objects.requireNonNull(placesByDate.get(selectedDate)).get(spinnerPlacesPosition)));
+            snackbar.show();
+
+            if (meetingActivity.isTwoPanes()) {
+                mCallback.onMeetingIsAdded();
+                clearFields();
+            } else {
+                getActivity().onBackPressed();
+            }
         }
         return super.onOptionsItemSelected(item);
     }
 
     private void clearFields() {
-        subjectEditText.getText().clear();
+        Objects.requireNonNull(subjectEditText.getText()).clear();
         selectedPlace = null;
+        meetingTimesAdapter = null;
+        configureMeetingDatePicker();
         configureSpinnerPlaces();
         labelMeetingTimes.setVisibility(View.GONE);
         meetingTimesImageView.setVisibility(View.GONE);
         meetingTimesList.setVisibility(View.GONE);
         configureCollaboratorsList();
-
     }
+
+
 
     @Override
     public void onStart() {
         super.onStart();
         configureImageViews();
+        configureMeetingDatePicker();
         configureSpinnerPlaces();
         configureCollaboratorsList();
     }
@@ -209,79 +229,126 @@ public class AddMeetingFragment extends Fragment {
      * configure the icons of fragment
      */
     private void configureImageViews() {
-        subjectImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(subjectTextInputLayout.getVisibility() == View.GONE) {
-                    subjectTextInputLayout.setVisibility(View.VISIBLE);
-                    subjectEditText.requestFocus();
-                } else {
-                    subjectTextInputLayout.setVisibility(View.GONE);
-                }
+        subjectImageView.setOnClickListener(v -> {
+            if (subjectTextInputLayout.getVisibility() == View.GONE) {
+                subjectTextInputLayout.setVisibility(View.VISIBLE);
+                subjectEditText.requestFocus();
+            } else {
+                subjectTextInputLayout.setVisibility(View.GONE);
             }
         });
 
-        placesImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(spinnerPlaces.getVisibility() == View.GONE) {
-                    spinnerPlaces.setVisibility(View.VISIBLE);
-                } else {
-                    spinnerPlaces.setVisibility(View.GONE);
-                }
+        placesImageView.setOnClickListener(v -> {
+            if (spinnerPlaces.getVisibility() == View.GONE) {
+                spinnerPlaces.setVisibility(View.VISIBLE);
+            } else {
+                spinnerPlaces.setVisibility(View.GONE);
             }
         });
 
-        meetingTimesImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(meetingTimesList.getVisibility() == View.GONE) {
+        dateMeetingImageView.setOnClickListener(v -> {
+            if (meetingDatePicker.getVisibility() == View.GONE) {
+                meetingDatePicker.setVisibility(View.VISIBLE);
+            } else {
+                meetingDatePicker.setVisibility(View.GONE);
+            }
+        });
+
+        meetingTimesImageView.setOnClickListener(v -> {
+            if (meetingTimesList.getVisibility() == View.GONE) {
+                meetingTimesList.setVisibility(View.VISIBLE);
+            } else {
+                meetingTimesList.setVisibility(View.GONE);
+            }
+        });
+
+        participantsImageView.setOnClickListener(v -> {
+            if(collaboratorsList.getVisibility() == View.GONE) {
+                collaboratorsList.setVisibility(View.VISIBLE);
+            } else {
+                collaboratorsList.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void configureMeetingDatePicker() {
+        meetingDatePicker.setMinDate(System.currentTimeMillis() - 1000);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+
+        if(selectedDate == null) {
+            selectedDate = new GregorianCalendar();
+            selectedDate.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE));
+        }
+
+        if(placesByDate == null) {
+            placesByDate = new HashMap<>();
+            placesByDate.put(selectedDate, generatePlaces());
+        }
+
+        meetingDatePicker.init(selectedDate.get(Calendar.YEAR),
+                selectedDate.get(Calendar.MONTH),
+                selectedDate.get(Calendar.DAY_OF_MONTH),
+                (datePicker, year, month, dayOfMonth) -> {
+                    labelMeetingTimes.setVisibility(View.VISIBLE);
+                    meetingTimesImageView.setVisibility(View.VISIBLE);
                     meetingTimesList.setVisibility(View.VISIBLE);
-                } else {
-                    meetingTimesList.setVisibility(View.GONE);
-                }
-            }
-        });
 
-        participantsImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(collaboratorsList.getVisibility() == View.GONE) {
-                    collaboratorsList.setVisibility(View.VISIBLE);
-                } else {
-                    collaboratorsList.setVisibility(View.GONE);
-                }
-            }
-        });
+                    selectedDate.set(Calendar.YEAR, year);
+                    selectedDate.set(Calendar.MONTH, (month));
+                    selectedDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                    if(placesByDate.get(selectedDate) == null) {
+                        placesByDate.put(selectedDate, generatePlaces());
+                    }
+
+                    meetingTimesAdapter = new MeetingTimesAdapter(selectedDate, Objects.requireNonNull(placesByDate.get(selectedDate)).get(spinnerPlacesPosition));
+                    meetingTimesList.setAdapter(meetingTimesAdapter);
+                    meetingTimesAdapter.notifyDataSetChanged();
+                });
     }
 
     /**
      * configure the spinner of the places for meeting
      */
     private void configureSpinnerPlaces() {
-        PlacesSpinnerAdapter dataAdapter = new PlacesSpinnerAdapter(getActivity(), places);
+        if (placesByDate.get(selectedDate) == null) {
+            placesByDate.put(selectedDate, generatePlaces());
+        }
+
+        PlacesSpinnerAdapter dataAdapter = new PlacesSpinnerAdapter(getActivity(), placesByDate.get(selectedDate));
         spinnerPlaces.setAdapter(dataAdapter);
         spinnerPlaces.setPrompt(getString(R.string.spinner_default_text));
 
         spinnerPlaces.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(position != 0) {
-                    selectedPlace = places.get(position - 1);
+                if (position != 0) {
+
+                    if(placesByDate.get(selectedDate) == null) {
+                        placesByDate.put(selectedDate, generatePlaces());
+                    }
+
+                    selectedPlace = Objects.requireNonNull(placesByDate.get(selectedDate)).get(position - 1);
+                    spinnerPlacesPosition = position - 1;
+                    labelDateMeeting.setVisibility(View.VISIBLE);
+                    dateMeetingImageView.setVisibility(View.VISIBLE);
+                    meetingDatePicker.setVisibility(View.VISIBLE);
+
                     labelMeetingTimes.setVisibility(View.VISIBLE);
                     meetingTimesImageView.setVisibility(View.VISIBLE);
                     meetingTimesList.setVisibility(View.VISIBLE);
 
-                    if(meetingTimesAdapter == null) {
-                        meetingTimesAdapter = new MeetingTimesAdapter(selectedPlace);
-                        meetingTimesList.setAdapter(meetingTimesAdapter);
-                    } else {
-                      meetingTimesAdapter.setSelectedPlace(selectedPlace);
-                    }
+                    meetingTimesAdapter = new MeetingTimesAdapter(selectedDate, Objects.requireNonNull(placesByDate.get(selectedDate)).get(spinnerPlacesPosition));
+                    meetingTimesList.setAdapter(meetingTimesAdapter);
+                    meetingTimesAdapter.notifyDataSetChanged();
                 }
             }
+
             @Override
-            public void onNothingSelected(AdapterView<?> parent) { }
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
         });
     }
 

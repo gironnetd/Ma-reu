@@ -13,7 +13,6 @@
         </menu>
     </item>
     <item android:id="@+id/add_meeting"
-        android:title="@string/add_meeting_title"
-        android:icon="@drawable/ic_add_white_24dp"
+        android:title="@string/validate_add_meeting"
         app:showAsAction="always"/>
 </menu>

@@ -11,11 +11,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import static com.openclassrooms.mareu.model.Collaborator.CollaboratorGenerator.generateCollaborators;
 import static com.openclassrooms.mareu.model.Meeting.MeetingGenerator.generateMeetings;
+import static com.openclassrooms.mareu.model.Place.PlaceGenerator.PLACE_NAMES;
 import static com.openclassrooms.mareu.model.Place.PlaceGenerator.generatePlaces;
 import static com.openclassrooms.mareu.model.Meeting.MeetingGenerator;
 import static org.junit.Assert.assertEquals;
@@ -27,6 +31,7 @@ import static org.junit.Assert.assertTrue;
  * Unit test on Meeting service
  */
 @RunWith(JUnit4.class)
+
 public class MeetingServiceTest {
 
     private MeetingApiService service;
@@ -87,21 +92,43 @@ public class MeetingServiceTest {
 
     @Test
     public void filter_Meetings_by_Date_With_Success() {
-        List<Meeting> meetings = generateMeetings();
 
-        service.filterMeetingsByDate();
+        // choose day of month between 1, 2 or 4
+        final int DAY_OF_MONTH = 1;
 
-        Collections.sort(meetings, new Meeting.MeetingDateComparator());
-        assertEquals(meetings, service.getMeetings());
+        List<Meeting> allMeetings = service.getMeetings();
+        List<Meeting> meetingsByDate = new ArrayList<>();
+
+        GregorianCalendar dateExpected = new GregorianCalendar();
+
+        for(int index = 0; index < allMeetings.size(); index++) {
+            if(allMeetings.get(index).getSlot().getStartTime().get(Calendar.DAY_OF_MONTH) == DAY_OF_MONTH) {
+               meetingsByDate.add(allMeetings.get(index));
+            }
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+
+        dateExpected.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), DAY_OF_MONTH);
+
+        assertEquals(meetingsByDate, service.filterMeetingsByDate(dateExpected));
     }
 
     @Test
     public void filter_Meetings_by_Place_With_Success() {
-        List<Meeting> meetings = generateMeetings();
 
-        service.filterMeetingsByPlace();
+        final String PLACE_NAME = PLACE_NAMES.get(3);
 
-        Collections.sort(meetings, new Meeting.MeetingPlaceComparator());
-        assertEquals(meetings, service.getMeetings());
+        List<Meeting> allMeetings = service.getMeetings();
+        List<Meeting> meetingsByPlace = new ArrayList<>();
+
+        for(int index = 0; index < allMeetings.size(); index++) {
+            if(allMeetings.get(index).getPlace().getName().equals(PLACE_NAME)) {
+                meetingsByPlace.add(allMeetings.get(index));
+            }
+        }
+
+        assertEquals(meetingsByPlace, service.filterMeetingsByPlace(PLACE_NAME));
     }
 }

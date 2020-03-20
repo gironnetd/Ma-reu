@@ -15,7 +15,7 @@
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_scrollFlags="scroll|enterAlways|snap"
+            app:layout_scrollFlags="noScroll"
             app:titleEnabled="false">
 
             <androidx.appcompat.widget.Toolbar
@@ -25,7 +25,7 @@
                 android:background="?attr/colorPrimary"
                 android:elevation="4dp"
                 app:popupTheme="@style/AppTheme.PopupOverlay"
-                app:layout_collapseMode="pin" />
+                app:layout_collapseMode="none" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
@@ -42,8 +42,8 @@
         android:id="@+id/fab_add_meeting"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="32dp"
         android:clickable="true"
         android:layout_gravity="bottom|end"
         app:layout_constraintBottom_toBottomOf="parent"
